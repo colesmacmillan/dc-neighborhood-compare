@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # DC Neighborhood Compare
 
 Static Astro site for comparing popular Washington, DC neighborhoods for college graduates moving to the city.
@@ -85,3 +86,6 @@ The script computes counts and densities per square kilometer for:
 - Neighborhoods: NoMa, Navy Yard, U Street, Dupont Circle, Georgetown
 - Geometry model: center point plus radius
 - Output format: JSON only
+=======
+# dc-neighborhood-compare
+>>>>>>> fb73dd789c669395ebf9a42c53f9e8442df18750
