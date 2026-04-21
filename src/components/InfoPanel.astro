@@ -1,0 +1,215 @@
+---
+const { neighborhoods } = Astro.props;
+---
+
+<aside class="panel" aria-labelledby="selector-heading">
+  <div class="panel-header">
+    <p class="panel-kicker">Selection</p>
+    <h2 id="selector-heading">Choose neighborhoods to compare</h2>
+    <p class="panel-copy">
+      Use the cards here or click markers on the map. The comparison table updates automatically.
+    </p>
+  </div>
+
+  <div class="selector-list">
+    {
+      neighborhoods.map((neighborhood) => (
+        <button
+          type="button"
+          class="selector-card"
+          data-toggle-selection
+          data-name={neighborhood.name}
+        >
+          <span class="selector-top">
+            <strong>{neighborhood.name}</strong>
+            <span class="rent">${neighborhood.rent_1br.toLocaleString()}/mo</span>
+          </span>
+          <span class="selector-body">{neighborhood.summary}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <section class="detail-card" id="selection-details" aria-live="polite">
+    <h3>Start by selecting a neighborhood</h3>
+    <p>Pick one or more areas to see rent, density metrics, and map highlights.</p>
+  </section>
+</aside>
+
+<script define:vars={{ neighborhoods }}>
+  const state = window.dcCompareState ?? {
+    selected: [neighborhoods[0]?.name].filter(Boolean),
+  };
+  window.dcCompareState = state;
+
+  const emitSelection = () => {
+    document.dispatchEvent(
+      new CustomEvent("dc-compare:selection-change", {
+        detail: { selected: [...state.selected] },
+      }),
+    );
+  };
+
+  const cards = [...document.querySelectorAll("[data-toggle-selection]")];
+  const details = document.getElementById("selection-details");
+
+  const formatMetricLabel = (key) =>
+    key
+      .replace("_density", "")
+      .replace("_", " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  const renderDetails = () => {
+    const selectedNeighborhoods = neighborhoods.filter(({ name }) => state.selected.includes(name));
+    cards.forEach((card) => {
+      card.classList.toggle("is-selected", state.selected.includes(card.dataset.name));
+    });
+
+    if (!selectedNeighborhoods.length) {
+      details.innerHTML = `
+        <h3>Start by selecting a neighborhood</h3>
+        <p>Pick one or more areas to see rent, density metrics, and map highlights.</p>
+      `;
+      return;
+    }
+
+    const featured = selectedNeighborhoods[selectedNeighborhoods.length - 1];
+    const metrics = Object.entries(featured.metrics)
+      .map(
+        ([key, value]) =>
+          `<li><span>${formatMetricLabel(key)}</span><strong>${value.toFixed(1)}/km^2</strong></li>`,
+      )
+      .join("");
+
+    details.innerHTML = `
+      <h3>${featured.name}</h3>
+      <p>${featured.summary}</p>
+      <p><strong>Estimated 1BR rent:</strong> $${featured.rent_1br.toLocaleString()} / month</p>
+      <ul>${metrics}</ul>
+    `;
+  };
+
+  cards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const name = card.dataset.name;
+      if (!name) return;
+
+      if (state.selected.includes(name)) {
+        state.selected = state.selected.filter((value) => value !== name);
+      } else {
+        state.selected = [...state.selected, name];
+      }
+
+      renderDetails();
+      emitSelection();
+    });
+  });
+
+  document.addEventListener("dc-compare:selection-change", (event) => {
+    state.selected = event.detail.selected;
+    renderDetails();
+  });
+
+  renderDetails();
+  emitSelection();
+</script>
+
+<style>
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    backdrop-filter: blur(10px);
+  }
+
+  .panel-header h2,
+  .detail-card h3 {
+    margin: 0;
+  }
+
+  .panel-kicker {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .panel-copy {
+    margin: 10px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .selector-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .selector-card {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface-strong);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      background 180ms ease;
+  }
+
+  .selector-card:hover,
+  .selector-card:focus-visible,
+  .selector-card.is-selected {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .selector-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .selector-body,
+  .detail-card p {
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .rent {
+    white-space: nowrap;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .detail-card {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 18px;
+    background: #f7f2e8;
+    border: 1px solid rgba(132, 94, 49, 0.12);
+  }
+
+  .detail-card ul {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+
+  .detail-card li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+</style>

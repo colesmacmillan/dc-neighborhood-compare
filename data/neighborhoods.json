@@ -1,0 +1,77 @@
+[
+  {
+    "name": "NoMa",
+    "lat": 38.9066,
+    "lon": -77.0033,
+    "radius_m": 1200,
+    "summary": "Fast-growing, apartment-heavy neighborhood with strong Metro access and plenty of casual food options.",
+    "rent_1br": 2650,
+    "metrics": {
+      "food_density": 41.8,
+      "nightlife_density": 6.6,
+      "grocery_density": 5.5,
+      "green_density": 4.2,
+      "transit_density": 8.8
+    }
+  },
+  {
+    "name": "Navy Yard",
+    "lat": 38.8765,
+    "lon": -77.0059,
+    "radius_m": 1200,
+    "summary": "Modern waterfront area with newer buildings, Nationals Park energy, and an easy social scene.",
+    "rent_1br": 2925,
+    "metrics": {
+      "food_density": 38.2,
+      "nightlife_density": 8.0,
+      "grocery_density": 4.6,
+      "green_density": 6.2,
+      "transit_density": 6.4
+    }
+  },
+  {
+    "name": "U Street",
+    "lat": 38.916,
+    "lon": -77.028,
+    "radius_m": 1200,
+    "summary": "Dense, lively, and walkable with a strong restaurant and nightlife cluster popular with recent grads.",
+    "rent_1br": 2550,
+    "metrics": {
+      "food_density": 56.4,
+      "nightlife_density": 14.4,
+      "grocery_density": 4.0,
+      "green_density": 3.1,
+      "transit_density": 7.7
+    }
+  },
+  {
+    "name": "Dupont Circle",
+    "lat": 38.9096,
+    "lon": -77.0434,
+    "radius_m": 1200,
+    "summary": "Central, polished, and highly walkable with a mix of restaurants, offices, and classic DC apartment stock.",
+    "rent_1br": 3050,
+    "metrics": {
+      "food_density": 52.9,
+      "nightlife_density": 10.2,
+      "grocery_density": 5.1,
+      "green_density": 5.3,
+      "transit_density": 7.3
+    }
+  },
+  {
+    "name": "Georgetown",
+    "lat": 38.9076,
+    "lon": -77.0723,
+    "radius_m": 1200,
+    "summary": "Historic and polished with strong retail and dining, fewer Metro connections, and some of the highest rents.",
+    "rent_1br": 3300,
+    "metrics": {
+      "food_density": 44.7,
+      "nightlife_density": 7.1,
+      "grocery_density": 3.5,
+      "green_density": 7.5,
+      "transit_density": 2.4
+    }
+  }
+]

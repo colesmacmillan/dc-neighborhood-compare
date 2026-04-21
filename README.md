@@ -1,43 +1,87 @@
-# Astro Starter Kit: Minimal
+# DC Neighborhood Compare
 
-```sh
-npm create astro@latest -- --template minimal
+Static Astro site for comparing popular Washington, DC neighborhoods for college graduates moving to the city.
+
+## Architecture
+
+The app stays fully static:
+
+```text
+Python script -> data/neighborhoods.json -> Astro frontend
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+There is no backend API. The Python script precomputes metrics from OpenStreetMap and writes them into JSON that Astro reads at build time.
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Project Structure
 
 ```text
 /
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+|-- data/
+|   `-- neighborhoods.json
+|-- scripts/
+|   `-- build_neighborhood_data.py
+|-- src/
+|   |-- components/
+|   |   |-- Comparison.astro
+|   |   |-- InfoPanel.astro
+|   |   `-- MapSection.astro
+|   `-- pages/
+|       `-- index.astro
+`-- package.json
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Local Setup
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+### 1. Install frontend dependencies
 
-Any static assets, like images, can be placed in the `public/` directory.
+```sh
+npm install
+```
 
-## 🧞 Commands
+### 2. Optional: build fresh neighborhood data
 
-All commands are run from the root of the project, from a terminal:
+Create a Python environment and install OSM tooling:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```sh
+python -m venv .venv
+.venv\Scripts\activate
+pip install osmnx pandas geopandas shapely pyproj
+python scripts/build_neighborhood_data.py
+```
 
-## 👀 Want to learn more?
+Notes:
+- `data/neighborhoods.json` is already checked in with example values so the site works immediately.
+- The Python script uses neighborhood center points plus a radius instead of exact official boundaries.
+- Rent values are mock but realistic estimates for 1-bedroom apartments.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### 3. Run the Astro app
+
+```sh
+npm run dev
+```
+
+Then open `http://localhost:4321`.
+
+### 4. Create a production build
+
+```sh
+npm run build
+npm run preview
+```
+
+## Metrics Included
+
+The script computes counts and densities per square kilometer for:
+
+- Food & drink
+- Nightlife
+- Grocery stores
+- Green space
+- Transit access
+
+## Data Notes
+
+- Source: OpenStreetMap via OSMnx
+- Neighborhoods: NoMa, Navy Yard, U Street, Dupont Circle, Georgetown
+- Geometry model: center point plus radius
+- Output format: JSON only

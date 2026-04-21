@@ -1,0 +1,185 @@
+---
+const { neighborhoods } = Astro.props;
+---
+
+<section class="comparison-card" aria-labelledby="comparison-heading">
+  <div class="comparison-header">
+    <div>
+      <p class="comparison-kicker">Comparison</p>
+      <h2 id="comparison-heading">Side-by-side metrics</h2>
+    </div>
+    <p class="comparison-copy">
+      Densities are shown per square kilometer using a neighborhood-centered radius instead of exact
+      official borders.
+    </p>
+  </div>
+
+  <div class="comparison-empty" id="comparison-empty">
+    Select one or more neighborhoods to populate the table.
+  </div>
+
+  <div class="comparison-table-shell" id="comparison-table-shell" hidden>
+    <table class="comparison-table">
+      <thead>
+        <tr id="comparison-head-row">
+          <th scope="col">Metric</th>
+        </tr>
+      </thead>
+      <tbody id="comparison-body"></tbody>
+    </table>
+  </div>
+</section>
+
+<script define:vars={{ neighborhoods }}>
+  const state = window.dcCompareState ?? { selected: [] };
+  window.dcCompareState = state;
+
+  const rows = [
+    { key: "rent_1br", label: "Estimated 1BR rent", formatter: (value) => `$${value.toLocaleString()}` },
+    {
+      key: "food_density",
+      label: "Food & drink density",
+      formatter: (value) => `${value.toFixed(1)}/km^2`,
+    },
+    {
+      key: "nightlife_density",
+      label: "Nightlife density",
+      formatter: (value) => `${value.toFixed(1)}/km^2`,
+    },
+    {
+      key: "grocery_density",
+      label: "Grocery density",
+      formatter: (value) => `${value.toFixed(1)}/km^2`,
+    },
+    {
+      key: "green_density",
+      label: "Green space density",
+      formatter: (value) => `${value.toFixed(1)}/km^2`,
+    },
+    {
+      key: "transit_density",
+      label: "Transit density",
+      formatter: (value) => `${value.toFixed(1)}/km^2`,
+    },
+  ];
+
+  const tableShell = document.getElementById("comparison-table-shell");
+  const emptyState = document.getElementById("comparison-empty");
+  const headRow = document.getElementById("comparison-head-row");
+  const body = document.getElementById("comparison-body");
+
+  const renderTable = () => {
+    const selectedNeighborhoods = neighborhoods.filter(({ name }) => state.selected.includes(name));
+
+    if (!selectedNeighborhoods.length) {
+      tableShell.hidden = true;
+      emptyState.hidden = false;
+      return;
+    }
+
+    emptyState.hidden = true;
+    tableShell.hidden = false;
+
+    headRow.innerHTML = `<th scope="col">Metric</th>${selectedNeighborhoods
+      .map((neighborhood) => `<th scope="col">${neighborhood.name}</th>`)
+      .join("")}`;
+
+    body.innerHTML = rows
+      .map((row) => {
+        const cells = selectedNeighborhoods
+          .map((neighborhood) => {
+            const value =
+              row.key === "rent_1br" ? neighborhood.rent_1br : neighborhood.metrics[row.key];
+            return `<td>${row.formatter(value)}</td>`;
+          })
+          .join("");
+
+        return `<tr><th scope="row">${row.label}</th>${cells}</tr>`;
+      })
+      .join("");
+  };
+
+  document.addEventListener("dc-compare:selection-change", (event) => {
+    state.selected = event.detail.selected;
+    renderTable();
+  });
+
+  renderTable();
+</script>
+
+<style>
+  .comparison-card {
+    margin-top: 24px;
+    padding: 22px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+
+  .comparison-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+
+  .comparison-kicker {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .comparison-header h2 {
+    margin: 0;
+  }
+
+  .comparison-copy,
+  .comparison-empty {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .comparison-copy {
+    max-width: 42ch;
+    margin: 0;
+  }
+
+  .comparison-table-shell {
+    overflow-x: auto;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .comparison-table thead th {
+    background: rgba(247, 242, 232, 0.9);
+  }
+
+  .comparison-table tbody th {
+    min-width: 220px;
+  }
+
+  @media (max-width: 720px) {
+    .comparison-header {
+      flex-direction: column;
+    }
+
+    .comparison-copy {
+      max-width: none;
+    }
+  }
+</style>

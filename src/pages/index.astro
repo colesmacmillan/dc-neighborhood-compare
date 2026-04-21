@@ -1,17 +1,117 @@
 ---
+import { readFile } from "node:fs/promises";
+import MapSection from "../components/MapSection.astro";
+import InfoPanel from "../components/InfoPanel.astro";
+import Comparison from "../components/Comparison.astro";
 
+const neighborhoods = JSON.parse(
+  await readFile(new URL("../../data/neighborhoods.json", import.meta.url), "utf-8"),
+);
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DC Neighborhood Compare</title>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <p class="eyebrow">Washington, DC relocation tool</p>
+        <h1>Compare DC neighborhoods side-by-side before you move.</h1>
+        <p class="intro">
+          Explore five popular post-grad neighborhoods with static JSON data generated from
+          OpenStreetMap and view their lifestyle metrics on a map.
+        </p>
+      </section>
+
+      <div class="top-grid">
+        <MapSection neighborhoods={neighborhoods} />
+        <InfoPanel neighborhoods={neighborhoods} />
+      </div>
+
+      <Comparison neighborhoods={neighborhoods} />
+    </main>
+  </body>
 </html>
+
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f1e8;
+    --surface: rgba(255, 253, 248, 0.9);
+    --surface-strong: #fffdf8;
+    --text: #1f2522;
+    --muted: #5f675f;
+    --line: rgba(31, 37, 34, 0.12);
+    --accent: #0f766e;
+    --accent-soft: rgba(15, 118, 110, 0.12);
+    --shadow: 0 22px 48px rgba(44, 52, 44, 0.08);
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Georgia, "Times New Roman", serif;
+    background:
+      radial-gradient(circle at top left, rgba(255, 255, 255, 0.75), transparent 30%),
+      linear-gradient(180deg, #f8f5ed 0%, var(--bg) 100%);
+    color: var(--text);
+  }
+
+  body {
+    padding: 32px 20px 64px;
+  }
+
+  .page-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .hero {
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 10ch;
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    line-height: 0.95;
+  }
+
+  .intro {
+    max-width: 58ch;
+    margin: 18px 0 0;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .top-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    body {
+      padding: 20px 14px 40px;
+    }
+
+    .top-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
