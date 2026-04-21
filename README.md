@@ -18,7 +18,8 @@ There is no backend API. The Python script precomputes metrics from OpenStreetMa
 /
 |-- .github/
 |   `-- workflows/
-|       `-- deploy.yml
+|       |-- deploy.yml
+|       `-- update-data.yml
 |-- data/
 |   `-- neighborhoods.json
 |-- scripts/
@@ -54,9 +55,9 @@ python scripts/build_neighborhood_data.py
 ```
 
 Notes:
-- `data/neighborhoods.json` is already checked in with example values so the site works immediately.
+- `data/neighborhoods.json` is already checked in so the site works immediately.
 - The Python script uses neighborhood center points plus a radius instead of exact official boundaries.
-- Rent values are mock but realistic estimates for 1-bedroom apartments.
+- Rent values are still curated estimates in the current script.
 
 ### 3. Run the Astro app
 
@@ -83,6 +84,33 @@ https://colesmacmillan.github.io/dc-neighborhood-compare
 
 If you rename the repository, update `base` in `astro.config.mjs` to match the new repo name.
 
+## Data Refresh
+
+The site shows a visible `Data last updated` timestamp pulled from `data/neighborhoods.json`.
+
+Two GitHub Actions workflows support refreshes:
+
+- `Deploy to GitHub Pages`: deploys the current site after pushes to `main`
+- `Update Neighborhood Data`: regenerates `data/neighborhoods.json` from the Python script
+
+`Update Neighborhood Data` works in two ways:
+
+- Manual refresh: `GitHub -> Actions -> Update Neighborhood Data -> Run workflow`
+- Monthly refresh: the workflow is scheduled to run automatically once a month
+
+If you want to stop monthly refreshes later:
+
+- Go to `GitHub -> Actions -> Update Neighborhood Data`
+- Open the workflow menu
+- Click `Disable workflow`
+
+Important:
+
+- Scheduled workflows in public repositories can be automatically disabled by GitHub after 60 days of no repository activity
+- OpenStreetMap metrics refresh automatically through the script
+- Rent values now adjust monthly using Zillow Research ZORI proxy geographies such as ZIP codes and county-level series
+- Those rent values are still approximate neighborhood proxies, not exact listing-level neighborhood averages
+
 ## Metrics Included
 
 The script computes counts and densities per square kilometer for:
@@ -96,6 +124,6 @@ The script computes counts and densities per square kilometer for:
 ## Data Notes
 
 - Source: OpenStreetMap via OSMnx
-- Neighborhoods: NoMa, Navy Yard, U Street, Dupont Circle, Georgetown
+- Neighborhoods: Navy Yard, NoMa, Foggy Bottom, Adams Morgan, Arlington, Ballston, Dupont Circle
 - Geometry model: center point plus radius
 - Output format: JSON only
