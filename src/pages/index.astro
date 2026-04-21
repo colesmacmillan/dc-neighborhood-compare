@@ -15,6 +15,9 @@ const updateNote =
   dataset.update_note ??
   "OpenStreetMap metrics and rent estimates are refreshed from external sources when available.";
 const failures = Array.isArray(dataset.failures) ? dataset.failures : [];
+const radiusDisclosure = neighborhoods
+  .map((neighborhood) => `${neighborhood.name}: ${neighborhood.radius_m}m`)
+  .join(" | ");
 ---
 
 <html lang="en">
@@ -55,6 +58,10 @@ const failures = Array.isArray(dataset.failures) ? dataset.failures : [];
           <h3>Zillow rent estimates</h3>
           <p><strong>Last updated:</strong> {zillowLastUpdatedLabel}</p>
           <p>{zillowMethod}</p>
+        </div>
+        <div class="data-status-block">
+          <h3>Neighborhood radius</h3>
+          <p>{radiusDisclosure}</p>
         </div>
         <div class="data-status-block">
           <h3>Failures and fallbacks</h3>
