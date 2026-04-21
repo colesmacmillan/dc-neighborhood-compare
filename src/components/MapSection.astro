@@ -84,7 +84,7 @@ const { neighborhoods } = Astro.props;
       }).addTo(map);
 
       marker.bindPopup(
-        `<strong>${neighborhood.name}</strong><br />$${neighborhood.rent_1br.toLocaleString()} 1BR`,
+        `<strong>${neighborhood.name}</strong><br />1BR: $${neighborhood.rent_1br.toLocaleString()}<br />2BR: $${neighborhood.rent_2br.toLocaleString()}<br />3BR: $${neighborhood.rent_3br.toLocaleString()}`,
       );
       marker.on("click", () => updateSelection(neighborhood.name));
       markers.set(neighborhood.name, marker);

@@ -22,7 +22,7 @@ const { neighborhoods } = Astro.props;
         >
           <span class="selector-top">
             <strong>{neighborhood.name}</strong>
-            <span class="rent">${neighborhood.rent_1br.toLocaleString()}/mo</span>
+            <span class="rent">from ${Math.round(neighborhood.rent_3br / 3).toLocaleString()}/person</span>
           </span>
           <span class="selector-body">{neighborhood.summary}</span>
         </button>
@@ -84,7 +84,7 @@ const { neighborhoods } = Astro.props;
     details.innerHTML = `
       <h3>${featured.name}</h3>
       <p>${featured.summary}</p>
-      <p><strong>Estimated 1BR rent:</strong> $${featured.rent_1br.toLocaleString()} / month</p>
+      <p><strong>Estimated cost per person:</strong> 1BR $${featured.rent_1br.toLocaleString()} | 2BR $${Math.round(featured.rent_2br / 2).toLocaleString()} | 3BR $${Math.round(featured.rent_3br / 3).toLocaleString()}</p>
       <ul>${metrics}</ul>
     `;
   };

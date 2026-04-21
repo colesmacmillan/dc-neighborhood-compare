@@ -35,7 +35,21 @@ const { neighborhoods } = Astro.props;
   window.dcCompareState = state;
 
   const rows = [
-    { key: "rent_1br", label: "Estimated 1BR rent", formatter: (value) => `$${value.toLocaleString()}` },
+    {
+      key: "rent_1br",
+      label: "1BR cost per person",
+      formatter: (value) => `$${Math.round(value).toLocaleString()}`,
+    },
+    {
+      key: "rent_2br",
+      label: "2BR cost per person",
+      formatter: (value) => `$${Math.round(value / 2).toLocaleString()}`,
+    },
+    {
+      key: "rent_3br",
+      label: "3BR cost per person",
+      formatter: (value) => `$${Math.round(value / 3).toLocaleString()}`,
+    },
     {
       key: "food_density",
       label: "Food & drink density",
@@ -89,7 +103,7 @@ const { neighborhoods } = Astro.props;
         const cells = selectedNeighborhoods
           .map((neighborhood) => {
             const value =
-              row.key === "rent_1br" ? neighborhood.rent_1br : neighborhood.metrics[row.key];
+              row.key.startsWith("rent_") ? neighborhood[row.key] : neighborhood.metrics[row.key];
             return `<td>${row.formatter(value)}</td>`;
           })
           .join("");

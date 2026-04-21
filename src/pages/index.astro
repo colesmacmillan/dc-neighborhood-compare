@@ -1,8 +1,10 @@
 ---
-import neighborhoods from "../../data/neighborhoods.json";
+import dataset from "../../data/neighborhoods.json";
 import MapSection from "../components/MapSection.astro";
 import InfoPanel from "../components/InfoPanel.astro";
 import Comparison from "../components/Comparison.astro";
+
+const neighborhoods = dataset.neighborhoods;
 ---
 
 <html lang="en">
@@ -15,9 +17,9 @@ import Comparison from "../components/Comparison.astro";
     <main class="page-shell">
       <section class="hero">
         <p class="eyebrow">Washington, DC relocation tool</p>
-        <h1>Compare DC neighborhoods side-by-side before you move.</h1>
+        <h1>Compare DC neighborhoods side-by-side before the move.</h1>
         <p class="intro">
-          Explore five popular post-grad neighborhoods with static JSON data generated from
+          Explore popular post-grad neighborhoods in DC with static JSON data generated from
           OpenStreetMap and view their lifestyle metrics on a map.
         </p>
       </section>
@@ -28,6 +30,11 @@ import Comparison from "../components/Comparison.astro";
       </div>
 
       <Comparison neighborhoods={neighborhoods} />
+
+      <section class="data-status" aria-label="Dataset information">
+        <span><strong>Data last updated:</strong> {dataset.last_updated_label}</span>
+        <span>{dataset.update_note}</span>
+      </section>
     </main>
   </body>
 </html>
@@ -81,7 +88,6 @@ import Comparison from "../components/Comparison.astro";
 
   h1 {
     margin: 0;
-    max-width: 10ch;
     font-size: clamp(2.6rem, 6vw, 5rem);
     line-height: 0.95;
   }
@@ -99,6 +105,22 @@ import Comparison from "../components/Comparison.astro";
     grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
     gap: 24px;
     align-items: start;
+  }
+
+  .data-status {
+    display: grid;
+    gap: 6px;
+    margin-top: 24px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(255, 253, 248, 0.78);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .data-status strong {
+    color: var(--text);
   }
 
   @media (max-width: 900px) {
