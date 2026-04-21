@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # DC Neighborhood Compare
 
 Static Astro site for comparing popular Washington, DC neighborhoods for college graduates moving to the city.
@@ -17,6 +16,9 @@ There is no backend API. The Python script precomputes metrics from OpenStreetMa
 
 ```text
 /
+|-- .github/
+|   `-- workflows/
+|       `-- deploy.yml
 |-- data/
 |   `-- neighborhoods.json
 |-- scripts/
@@ -28,6 +30,7 @@ There is no backend API. The Python script precomputes metrics from OpenStreetMa
 |   |   `-- MapSection.astro
 |   `-- pages/
 |       `-- index.astro
+|-- astro.config.mjs
 `-- package.json
 ```
 
@@ -70,6 +73,16 @@ npm run build
 npm run preview
 ```
 
+## GitHub Pages Hosting
+
+This repo is configured for a project page at:
+
+```text
+https://colesmacmillan.github.io/dc-neighborhood-compare
+```
+
+If you rename the repository, update `base` in `astro.config.mjs` to match the new repo name.
+
 ## Metrics Included
 
 The script computes counts and densities per square kilometer for:
@@ -86,6 +99,3 @@ The script computes counts and densities per square kilometer for:
 - Neighborhoods: NoMa, Navy Yard, U Street, Dupont Circle, Georgetown
 - Geometry model: center point plus radius
 - Output format: JSON only
-=======
-# dc-neighborhood-compare
->>>>>>> fb73dd789c669395ebf9a42c53f9e8442df18750
