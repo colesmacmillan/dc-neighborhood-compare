@@ -4,7 +4,17 @@ import MapSection from "../components/MapSection.astro";
 import InfoPanel from "../components/InfoPanel.astro";
 import Comparison from "../components/Comparison.astro";
 
-const neighborhoods = dataset.neighborhoods;
+const neighborhoods = dataset.neighborhoods ?? [];
+const osmLastUpdatedLabel = dataset.osm_last_updated_label ?? dataset.last_updated_label ?? "Unknown";
+const zillowLastUpdatedLabel =
+  dataset.zillow_last_updated_label ?? dataset.last_updated_label ?? "Unavailable";
+const zillowMethod =
+  dataset.zillow_method ??
+  "Neighborhood rent estimates are scaled from broader Zillow proxy geographies and should be treated as directional estimates.";
+const updateNote =
+  dataset.update_note ??
+  "OpenStreetMap metrics and rent estimates are refreshed from external sources when available.";
+const failures = Array.isArray(dataset.failures) ? dataset.failures : [];
 ---
 
 <html lang="en">
@@ -34,24 +44,24 @@ const neighborhoods = dataset.neighborhoods;
       <section class="data-status" aria-label="Dataset information">
         <div class="data-status-block">
           <h2>Data transparency</h2>
-          <p>{dataset.update_note}</p>
+          <p>{updateNote}</p>
         </div>
         <div class="data-status-block">
           <h3>OpenStreetMap</h3>
-          <p><strong>Last updated:</strong> {dataset.osm_last_updated_label}</p>
+          <p><strong>Last updated:</strong> {osmLastUpdatedLabel}</p>
           <p>Food, nightlife, grocery, green space, and transit counts come from OpenStreetMap features gathered around each neighborhood center point.</p>
         </div>
         <div class="data-status-block">
           <h3>Zillow rent estimates</h3>
-          <p><strong>Last updated:</strong> {dataset.zillow_last_updated_label}</p>
-          <p>{dataset.zillow_method}</p>
+          <p><strong>Last updated:</strong> {zillowLastUpdatedLabel}</p>
+          <p>{zillowMethod}</p>
         </div>
         <div class="data-status-block">
           <h3>Failures and fallbacks</h3>
           {
-            dataset.failures.length ? (
+            failures.length ? (
               <ul>
-                {dataset.failures.map((item) => <li>{item}</li>)}
+                {failures.map((item) => <li>{item}</li>)}
               </ul>
             ) : (
               <p>No source failures were recorded in the most recent refresh.</p>
