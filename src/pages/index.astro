@@ -32,8 +32,32 @@ const neighborhoods = dataset.neighborhoods;
       <Comparison neighborhoods={neighborhoods} />
 
       <section class="data-status" aria-label="Dataset information">
-        <span><strong>Data last updated:</strong> {dataset.last_updated_label}</span>
-        <span>{dataset.update_note}</span>
+        <div class="data-status-block">
+          <h2>Data transparency</h2>
+          <p>{dataset.update_note}</p>
+        </div>
+        <div class="data-status-block">
+          <h3>OpenStreetMap</h3>
+          <p><strong>Last updated:</strong> {dataset.osm_last_updated_label}</p>
+          <p>Food, nightlife, grocery, green space, and transit counts come from OpenStreetMap features gathered around each neighborhood center point.</p>
+        </div>
+        <div class="data-status-block">
+          <h3>Zillow rent estimates</h3>
+          <p><strong>Last updated:</strong> {dataset.zillow_last_updated_label}</p>
+          <p>{dataset.zillow_method}</p>
+        </div>
+        <div class="data-status-block">
+          <h3>Failures and fallbacks</h3>
+          {
+            dataset.failures.length ? (
+              <ul>
+                {dataset.failures.map((item) => <li>{item}</li>)}
+              </ul>
+            ) : (
+              <p>No source failures were recorded in the most recent refresh.</p>
+            )
+          }
+        </div>
       </section>
     </main>
   </body>
@@ -109,18 +133,47 @@ const neighborhoods = dataset.neighborhoods;
 
   .data-status {
     display: grid;
-    gap: 6px;
-    margin-top: 24px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    background: rgba(255, 253, 248, 0.78);
-    border: 1px solid var(--line);
-    color: var(--muted);
-    line-height: 1.5;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(31, 37, 34, 0.08);
+    color: rgba(95, 103, 95, 0.82);
+    font-size: 0.84rem;
+    line-height: 1.4;
   }
 
+  .data-status-block h2,
+  .data-status-block h3,
   .data-status strong {
-    color: var(--text);
+    color: rgba(31, 37, 34, 0.88);
+  }
+
+  .data-status-block h2,
+  .data-status-block h3,
+  .data-status-block p {
+    margin: 0;
+  }
+
+  .data-status-block {
+    display: grid;
+    gap: 4px;
+  }
+
+  .data-status-block ul {
+    margin: 0;
+    padding-left: 16px;
+  }
+
+  .data-status-block h2 {
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .data-status-block h3 {
+    font-size: 0.82rem;
+    font-weight: 600;
   }
 
   @media (max-width: 900px) {
