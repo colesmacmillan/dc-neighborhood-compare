@@ -33,47 +33,62 @@ const { neighborhoods } = Astro.props;
 <script define:vars={{ neighborhoods }}>
   const state = window.dcCompareState ?? { selected: [] };
   window.dcCompareState = state;
+  const SQ_KM_TO_SQ_MI = 2.58999;
 
   const rows = [
     {
       key: "rent_1br",
-      label: "1BR cost per person",
+      label: "Avg 1BR cost per person",
+      group: "housing",
       formatter: (value) => `$${Math.round(value).toLocaleString()}`,
     },
     {
       key: "rent_2br",
-      label: "2BR cost per person",
+      label: "Avg 2BR cost per person",
+      group: "housing",
       formatter: (value) => `$${Math.round(value / 2).toLocaleString()}`,
     },
     {
       key: "rent_3br",
-      label: "3BR cost per person",
+      label: "Avg 3BR cost per person",
+      group: "housing",
       formatter: (value) => `$${Math.round(value / 3).toLocaleString()}`,
     },
     {
       key: "food_density",
+      group: "lifestyle",
       label: "Food & drink density",
-      formatter: (value) => `${value.toFixed(1)}/km^2`,
+      formatter: (value) => `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`,
     },
     {
       key: "nightlife_density",
+      group: "lifestyle",
       label: "Nightlife density",
-      formatter: (value) => `${value.toFixed(1)}/km^2`,
+      formatter: (value) => `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`,
     },
     {
       key: "grocery_density",
+      group: "lifestyle",
       label: "Grocery density",
-      formatter: (value) => `${value.toFixed(1)}/km^2`,
+      formatter: (value) => `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`,
     },
     {
       key: "green_density",
+      group: "lifestyle",
       label: "Green space density",
-      formatter: (value) => `${value.toFixed(1)}/km^2`,
+      formatter: (value) => `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`,
     },
     {
       key: "transit_density",
-      label: "Transit density",
-      formatter: (value) => `${value.toFixed(1)}/km^2`,
+      group: "lifestyle",
+      label: "Transit infrastructure density",
+      formatter: (value) => `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`,
+    },
+    {
+      key: "metro_stops",
+      group: "lifestyle",
+      label: "# of Metro stops",
+      formatter: (value) => `${value}`,
     },
   ];
 
@@ -99,7 +114,7 @@ const { neighborhoods } = Astro.props;
       .join("")}`;
 
     body.innerHTML = rows
-      .map((row) => {
+      .map((row, index) => {
         const cells = selectedNeighborhoods
           .map((neighborhood) => {
             const value =
@@ -108,7 +123,12 @@ const { neighborhoods } = Astro.props;
           })
           .join("");
 
-        return `<tr><th scope="row">${row.label}</th>${cells}</tr>`;
+        const needsSeparator = row.group === "lifestyle" && rows[index - 1]?.group === "housing";
+        const separatorRow = needsSeparator
+          ? `<tr class="separator-row" aria-hidden="true"><td colspan="${selectedNeighborhoods.length + 1}"></td></tr>`
+          : "";
+
+        return `${separatorRow}<tr><th scope="row">${row.label}</th>${cells}</tr>`;
       })
       .join("");
   };
@@ -185,6 +205,12 @@ const { neighborhoods } = Astro.props;
 
   .comparison-table tbody th {
     min-width: 220px;
+  }
+
+  .comparison-table tbody tr.separator-row td {
+    padding: 10px 0 6px;
+    border-bottom: 0;
+    border-top: 2px dashed rgba(31, 37, 34, 0.26);
   }
 
   @media (max-width: 720px) {

@@ -18,6 +18,8 @@ const failures = Array.isArray(dataset.failures) ? dataset.failures : [];
 const radiusDisclosure = neighborhoods
   .map((neighborhood) => `${neighborhood.name}: ${neighborhood.radius_m}m`)
   .join(" | ");
+const metricDisclosure =
+  "Food & drink: restaurant, fast food, cafe, bar, pub, food court, biergarten. Nightlife: bar, pub, nightclub. Grocery: supermarket, convenience. Green space: park, garden. Transit infrastructure: platforms, stations, stop positions, rail stops, bus stations. Metro stops: unique named subway stations.";
 ---
 
 <html lang="en">
@@ -62,6 +64,10 @@ const radiusDisclosure = neighborhoods
         <div class="data-status-block">
           <h3>Neighborhood radius</h3>
           <p>{radiusDisclosure}</p>
+        </div>
+        <div class="data-status-block">
+          <h3>Metric definitions</h3>
+          <p>{metricDisclosure}</p>
         </div>
         <div class="data-status-block">
           <h3>Failures and fallbacks</h3>

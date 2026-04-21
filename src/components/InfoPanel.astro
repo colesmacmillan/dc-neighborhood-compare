@@ -22,7 +22,7 @@ const { neighborhoods } = Astro.props;
         >
           <span class="selector-top">
             <strong>{neighborhood.name}</strong>
-            <span class="rent">from ${Math.round(neighborhood.rent_3br / 3).toLocaleString()}/person</span>
+            <span class="rent">from ${Math.round(neighborhood.rent_3br / 3).toLocaleString()}/person averages</span>
           </span>
           <span class="selector-body">{neighborhood.summary}</span>
         </button>
@@ -52,8 +52,17 @@ const { neighborhoods } = Astro.props;
 
   const cards = [...document.querySelectorAll("[data-toggle-selection]")];
   const details = document.getElementById("selection-details");
+  const SQ_KM_TO_SQ_MI = 2.58999;
 
   const formatMetricLabel = (key) =>
+    ({
+      food_density: "Food & Drink Density",
+      nightlife_density: "Nightlife Density",
+      grocery_density: "Grocery Density",
+      green_density: "Green Space Density",
+      transit_density: "Transit Infrastructure Density",
+      metro_stops: "Metro Stops",
+    })[key] ??
     key
       .replace("_density", "")
       .replace("_", " ")
@@ -77,15 +86,23 @@ const { neighborhoods } = Astro.props;
     const metrics = Object.entries(featured.metrics)
       .map(
         ([key, value]) =>
-          `<li><span>${formatMetricLabel(key)}</span><strong>${value.toFixed(1)}/km^2</strong></li>`,
+          `<li><span>${formatMetricLabel(key)}</span><strong>${
+            key === "metro_stops" ? value : `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`
+          }</strong></li>`,
       )
       .join("");
 
     details.innerHTML = `
       <h3>${featured.name}</h3>
       <p>${featured.summary}</p>
-      <p><strong>Estimated cost per person:</strong> 1BR $${featured.rent_1br.toLocaleString()} | 2BR $${Math.round(featured.rent_2br / 2).toLocaleString()} | 3BR $${Math.round(featured.rent_3br / 3).toLocaleString()}</p>
-      <ul>${metrics}</ul>
+      <p class="detail-section-label">Housing averages per person</p>
+      <ul class="detail-list">
+        <li><span>1 bedroom</span><strong>$${featured.rent_1br.toLocaleString()}</strong></li>
+        <li><span>2 bedroom</span><strong>$${Math.round(featured.rent_2br / 2).toLocaleString()}</strong></li>
+        <li><span>3 bedroom</span><strong>$${Math.round(featured.rent_3br / 3).toLocaleString()}</strong></li>
+      </ul>
+      <p class="detail-section-label">Lifestyle metrics</p>
+      <ul class="detail-list">${metrics}</ul>
     `;
   };
 
@@ -199,17 +216,42 @@ const { neighborhoods } = Astro.props;
     border: 1px solid rgba(132, 94, 49, 0.12);
   }
 
-  .detail-card ul {
+  .detail-section-label {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .detail-list {
     list-style: none;
-    margin: 16px 0 0;
+    margin: 10px 0 0;
     padding: 0;
     display: grid;
     gap: 8px;
   }
 
-  .detail-card li {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
+  .detail-list li {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 16px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(31, 37, 34, 0.08);
+  }
+
+  .detail-list li::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    margin-top: 0.45rem;
+    border-radius: 999px;
+    background: rgba(31, 37, 34, 0.5);
+  }
+
+  .detail-list li span {
+    padding-right: 8px;
   }
 </style>
