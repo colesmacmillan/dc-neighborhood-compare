@@ -7,7 +7,7 @@ const { neighborhoods } = Astro.props;
     <p class="panel-kicker">Selection</p>
     <h2 id="selector-heading">Choose neighborhoods to compare</h2>
     <p class="panel-copy">
-      Use the cards here or click markers on the map. The comparison table updates automatically.
+      Use the cards here or click markers on the map. The comparison table below updates automatically.
     </p>
   </div>
 
@@ -86,7 +86,7 @@ const { neighborhoods } = Astro.props;
     const metrics = Object.entries(featured.metrics)
       .map(
         ([key, value]) =>
-          `<li><span>${formatMetricLabel(key)}</span><strong>${
+          `<li><span>${formatMetricLabel(key)}&nbsp;&nbsp;&nbsp;</span><strong>${
             key === "metro_stops" ? value : `${(value * SQ_KM_TO_SQ_MI).toFixed(1)}/mi^2`
           }</strong></li>`,
       )
@@ -97,9 +97,9 @@ const { neighborhoods } = Astro.props;
       <p>${featured.summary}</p>
       <p class="detail-section-label">Housing averages per person</p>
       <ul class="detail-list">
-        <li><span>1 bedroom</span><strong>$${featured.rent_1br.toLocaleString()}</strong></li>
-        <li><span>2 bedroom</span><strong>$${Math.round(featured.rent_2br / 2).toLocaleString()}</strong></li>
-        <li><span>3 bedroom</span><strong>$${Math.round(featured.rent_3br / 3).toLocaleString()}</strong></li>
+        <li><span>1 bedroom&nbsp;&nbsp;&nbsp;</span><strong>$${featured.rent_1br.toLocaleString()}</strong></li>
+        <li><span>2 bedroom&nbsp;&nbsp;&nbsp;</span><strong>$${Math.round(featured.rent_2br / 2).toLocaleString()}</strong></li>
+        <li><span>3 bedroom&nbsp;&nbsp;&nbsp;</span><strong>$${Math.round(featured.rent_3br / 3).toLocaleString()}</strong></li>
       </ul>
       <p class="detail-section-label">Lifestyle metrics</p>
       <ul class="detail-list">${metrics}</ul>
@@ -235,10 +235,11 @@ const { neighborhoods } = Astro.props;
 
   .detail-list li {
     display: grid;
-    grid-template-columns: 12px minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: 16px;
-    padding: 8px 0;
+    grid-template-columns: 12px minmax(0, 1fr) minmax(124px, auto);
+    align-items: start;
+    column-gap: 24px;
+    row-gap: 4px;
+    padding: 10px 0;
     border-top: 1px solid rgba(31, 37, 34, 0.08);
   }
 
@@ -252,6 +253,16 @@ const { neighborhoods } = Astro.props;
   }
 
   .detail-list li span {
+    display: block;
     padding-right: 8px;
+    line-height: 1.45;
+  }
+
+  .detail-list li strong {
+    display: block;
+    min-width: 124px;
+    text-align: right;
+    line-height: 1.45;
+    white-space: nowrap;
   }
 </style>

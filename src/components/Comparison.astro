@@ -9,8 +9,9 @@ const { neighborhoods } = Astro.props;
       <h2 id="comparison-heading">Side-by-side metrics</h2>
     </div>
     <p class="comparison-copy">
-      Densities are shown per square kilometer using a neighborhood-centered radius instead of exact
-      official borders.
+      Densities are shown using a neighborhood-centered radius rather than exact official borders.
+      Rents shown are neighborhood averages and may skew upward because newer luxury buildings are
+      often overrepresented.
     </p>
   </div>
 
@@ -152,9 +153,10 @@ const { neighborhoods } = Astro.props;
   }
 
   .comparison-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.55fr);
+    align-items: flex-start;
+    gap: 32px;
     margin-bottom: 18px;
   }
 
@@ -178,7 +180,7 @@ const { neighborhoods } = Astro.props;
   }
 
   .comparison-copy {
-    max-width: 42ch;
+    max-width: none;
     margin: 0;
   }
 
@@ -215,7 +217,7 @@ const { neighborhoods } = Astro.props;
 
   @media (max-width: 720px) {
     .comparison-header {
-      flex-direction: column;
+      grid-template-columns: 1fr;
     }
 
     .comparison-copy {

@@ -1,4 +1,6 @@
 ---
+import boundaryData from "../../data/featured-boundaries.json";
+
 const { neighborhoods } = Astro.props;
 ---
 
@@ -10,12 +12,91 @@ const { neighborhoods } = Astro.props;
     </div>
     <p class="map-copy">Selected neighborhoods stay highlighted on the map for quick visual comparison.</p>
   </div>
+
   <div id="dc-map" class="map-frame" aria-label="Map of Washington, DC neighborhoods"></div>
+
+  <section class="context-shell" aria-labelledby="context-map-heading">
+    <div class="context-header">
+      <div>
+        <p class="context-kicker">Context map</p>
+        <h3 id="context-map-heading">Neighborhood boundaries and shape context (approx.)</h3>
+      </div>
+      <p class="context-copy">Select available neighborhoods to view and compare information.</p>
+    </div>
+
+    <div id="dc-context-map" class="context-frame" aria-label="Boundary map of selected Washington area neighborhoods"></div>
+  </section>
 </section>
 
-<script define:vars={{ neighborhoods }}>
+<script define:vars={{ neighborhoods, boundaryData }}>
   const state = window.dcCompareState ?? { selected: [] };
   window.dcCompareState = state;
+
+  const buttonSelector = ".selector-card[data-name]";
+  let contextHoverName = null;
+  const labelAnchors = {
+    "Dupont Circle": { lat: 38.9152, lng: -77.0324 },
+    "Foggy Bottom": { lat: 38.8943, lng: -77.0508 },
+    "Adams Morgan": { lat: 38.9313, lng: -77.0524 },
+    NoMa: { lat: 38.9052, lng: -77.0001 },
+    "Navy Yard": { lat: 38.8691, lng: -76.9928 },
+    Arlington: { lat: 38.8878, lng: -77.1485 },
+    Ballston: { lat: 38.8864, lng: -77.0964 },
+  };
+
+  const baseMarkerStyle = {
+    radius: 8,
+    weight: 2,
+    color: "#0f766e",
+    fillColor: "#f7efe0",
+    fillOpacity: 0.9,
+  };
+
+  const selectedMarkerStyle = {
+    radius: 12,
+    color: "#8a4b16",
+    fillColor: "#c26a22",
+    fillOpacity: 0.95,
+  };
+
+  const defaultBoundaryStyle = (feature) => ({
+    color: "rgba(15, 118, 110, 0.72)",
+    weight: feature.properties.name === "Arlington" ? 2.4 : 2.4,
+    fillColor: feature.properties.name === "Arlington" ? "rgba(15, 118, 110, 0.08)" : "rgba(15, 118, 110, 0.12)",
+    fillOpacity: feature.properties.name === "Arlington" ? 0.12 : 0.18,
+  });
+
+  const hoveredBoundaryStyle = (feature) => ({
+    color: "#0f766e",
+    weight: feature.properties.name === "Arlington" ? 2.8 : 3,
+    fillColor: feature.properties.name === "Arlington" ? "rgba(15, 118, 110, 0.14)" : "rgba(15, 118, 110, 0.22)",
+    fillOpacity: feature.properties.name === "Arlington" ? 0.16 : 0.28,
+  });
+
+  const selectedBoundaryStyle = (feature) => ({
+    color: "#8a4b16",
+    weight: feature.properties.name === "Arlington" ? 2.8 : 3.4,
+    fillColor: feature.properties.name === "Arlington" ? "rgba(194, 106, 34, 0.08)" : "rgba(194, 106, 34, 0.18)",
+    fillOpacity: feature.properties.name === "Arlington" ? 0.08 : 0.22,
+  });
+
+  const emitSelection = () => {
+    document.dispatchEvent(
+      new CustomEvent("dc-compare:selection-change", {
+        detail: { selected: [...state.selected] },
+      }),
+    );
+  };
+
+  const toggleSelection = (name) => {
+    if (state.selected.includes(name)) {
+      state.selected = state.selected.filter((value) => value !== name);
+    } else {
+      state.selected = [...state.selected, name];
+    }
+
+    emitSelection();
+  };
 
   const leafletAssets = async () => {
     if (!document.querySelector('link[data-leaflet="styles"]')) {
@@ -47,77 +128,131 @@ const { neighborhoods } = Astro.props;
     return window.L;
   };
 
-  const emitSelection = () => {
-    document.dispatchEvent(
-      new CustomEvent("dc-compare:selection-change", {
-        detail: { selected: [...state.selected] },
-      }),
-    );
-  };
-
-  const updateSelection = (name) => {
-    if (state.selected.includes(name)) {
-      state.selected = state.selected.filter((value) => value !== name);
-    } else {
-      state.selected = [...state.selected, name];
-    }
-    emitSelection();
-  };
-
-  const initializeMap = async () => {
+  const initializeMaps = async () => {
     const L = await leafletAssets();
-    const map = L.map("dc-map", { zoomControl: true }).setView([38.9072, -77.0369], 12.4);
+
+    const markerMap = L.map("dc-map", { zoomControl: true }).setView([38.9072, -77.0369], 12.4);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    }).addTo(markerMap);
+
+    const contextMap = L.map("dc-context-map", {
+      zoomControl: false,
+      attributionControl: true,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      touchZoom: false,
+      tap: false,
+    });
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 18,
+    }).addTo(contextMap);
 
     const markers = new Map();
+    const boundaryLayers = new Map();
 
     neighborhoods.forEach((neighborhood) => {
-      const marker = L.circleMarker([neighborhood.lat, neighborhood.lon], {
-        radius: 8,
-        weight: 2,
-        color: "#0f766e",
-        fillColor: "#f7efe0",
-        fillOpacity: 0.9,
-      }).addTo(map);
+      const marker = L.circleMarker([neighborhood.lat, neighborhood.lon], baseMarkerStyle).addTo(markerMap);
 
       marker.bindPopup(
         `<strong>${neighborhood.name}</strong><br />1BR: $${neighborhood.rent_1br.toLocaleString()}<br />2BR: $${neighborhood.rent_2br.toLocaleString()}<br />3BR: $${neighborhood.rent_3br.toLocaleString()}`,
       );
-      marker.on("click", () => updateSelection(neighborhood.name));
+
+      marker.on("click", () => toggleSelection(neighborhood.name));
       markers.set(neighborhood.name, marker);
     });
+
+    const boundaryGroup = L.geoJSON(boundaryData, {
+      style: (feature) => defaultBoundaryStyle(feature),
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties.name;
+
+        boundaryLayers.set(name, layer);
+
+        layer.on("click", () => toggleSelection(name));
+        layer.on("mouseover", () => {
+          contextHoverName = name;
+          renderBoundaryState();
+        });
+        layer.on("mouseout", () => {
+          contextHoverName = null;
+          renderBoundaryState();
+        });
+      },
+    }).addTo(contextMap);
+
+    boundaryData.features.forEach((feature) => {
+      const name = feature.properties.name;
+      const anchor = labelAnchors[name];
+      if (!anchor) return;
+
+      L.marker([anchor.lat, anchor.lng], {
+        interactive: false,
+        icon: L.divIcon({
+          className: "context-label-marker",
+          html: `<span class="context-label-chip">${name}</span>`,
+        }),
+      }).addTo(contextMap);
+    });
+
+    contextMap.fitBounds(boundaryGroup.getBounds().pad(0.01));
 
     const renderMarkerState = () => {
       neighborhoods.forEach((neighborhood) => {
         const marker = markers.get(neighborhood.name);
         const selected = state.selected.includes(neighborhood.name);
-        marker.setStyle({
-          radius: selected ? 12 : 8,
-          color: selected ? "#8a4b16" : "#0f766e",
-          fillColor: selected ? "#c26a22" : "#f7efe0",
-          fillOpacity: selected ? 0.95 : 0.9,
-        });
+
+        marker.setStyle(selected ? selectedMarkerStyle : baseMarkerStyle);
+      });
+    };
+
+    // Keep the lower boundary map and the selection cards synchronized through shared data-name values.
+    const renderBoundaryState = () => {
+      boundaryLayers.forEach((layer, name) => {
+        const selected = state.selected.includes(name);
+        const hovered = contextHoverName === name;
+        const button = document.querySelector(`${buttonSelector}[data-name="${CSS.escape(name)}"]`);
+
+        if (selected) {
+          layer.setStyle(selectedBoundaryStyle(layer.feature));
+        } else if (hovered) {
+          layer.setStyle(hoveredBoundaryStyle(layer.feature));
+        } else {
+          layer.setStyle(defaultBoundaryStyle(layer.feature));
+        }
+
+        if (button) {
+          button.classList.toggle("context-hovered", hovered && !selected);
+        }
       });
     };
 
     document.addEventListener("dc-compare:selection-change", (event) => {
       state.selected = event.detail.selected;
       renderMarkerState();
+      renderBoundaryState();
     });
 
     renderMarkerState();
+    renderBoundaryState();
   };
 
-  initializeMap().catch((error) => {
+  initializeMaps().catch((error) => {
     console.error("Leaflet failed to load", error);
-    const mapRoot = document.getElementById("dc-map");
-    if (mapRoot) {
-      mapRoot.innerHTML =
-        "<p class='map-error'>Map failed to load. Check your internet connection for Leaflet tiles.</p>";
-    }
+
+    const roots = [document.getElementById("dc-map"), document.getElementById("dc-context-map")];
+    roots.forEach((root) => {
+      if (!root) return;
+      root.innerHTML =
+        "<p class='map-error'>Map failed to load. Check your internet connection for Leaflet and basemap tiles.</p>";
+    });
   });
 </script>
 
@@ -131,14 +266,19 @@ const { neighborhoods } = Astro.props;
     min-height: 560px;
   }
 
-  .map-header {
+  .map-header,
+  .context-header {
     display: flex;
     justify-content: space-between;
     gap: 20px;
+  }
+
+  .map-header {
     margin-bottom: 18px;
   }
 
-  .map-kicker {
+  .map-kicker,
+  .context-kicker {
     margin: 0 0 8px;
     font-size: 0.8rem;
     font-weight: 700;
@@ -147,23 +287,66 @@ const { neighborhoods } = Astro.props;
     color: var(--accent);
   }
 
-  .map-header h2 {
+  .map-header h2,
+  .context-header h3 {
     margin: 0;
   }
 
-  .map-copy {
-    max-width: 34ch;
+  .map-copy,
+  .context-copy {
+    max-width: 35ch;
     margin: 0;
     color: var(--muted);
     line-height: 1.55;
   }
 
-  .map-frame {
-    height: 470px;
+  .map-frame,
+  .context-frame {
     width: 100%;
     border-radius: 22px;
     overflow: hidden;
     border: 1px solid rgba(31, 37, 34, 0.08);
+  }
+
+  .map-frame {
+    height: 470px;
+  }
+
+  .context-shell {
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(31, 37, 34, 0.08);
+  }
+
+  .context-frame {
+    height: 410px;
+    margin-top: 16px;
+    background: #f6f2ea;
+  }
+
+  :global(.context-label-marker) {
+    background: transparent;
+    border: 0;
+  }
+
+  :global(.context-label-chip) {
+    display: inline-block;
+    white-space: nowrap;
+    background: rgba(255, 253, 248, 0.94);
+    border: 1px solid rgba(31, 37, 34, 0.08);
+    border-radius: 999px;
+    color: #173331;
+    box-shadow: 0 8px 18px rgba(31, 37, 34, 0.08);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    padding: 2px 8px;
+  }
+
+  :global(.selector-card.context-hovered) {
+    border-color: rgba(15, 118, 110, 0.42);
+    background: rgba(15, 118, 110, 0.08);
   }
 
   .map-error {
@@ -176,15 +359,21 @@ const { neighborhoods } = Astro.props;
       min-height: unset;
     }
 
-    .map-header {
+    .map-header,
+    .context-header {
       flex-direction: column;
     }
 
-    .map-copy {
+    .map-copy,
+    .context-copy {
       max-width: none;
     }
 
     .map-frame {
+      height: 360px;
+    }
+
+    .context-frame {
       height: 360px;
     }
   }
