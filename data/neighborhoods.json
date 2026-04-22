@@ -30,7 +30,8 @@
         "nightlife_density": 4.9,
         "grocery_density": 2.4,
         "green_density": 30.9,
-        "transit_density": 21.0
+        "transit_density": 12.8,
+        "metro_stops": 2
       }
     },
     {
@@ -56,7 +57,8 @@
         "nightlife_density": 6.2,
         "grocery_density": 5.3,
         "green_density": 16.8,
-        "transit_density": 46.6
+        "transit_density": 23.4,
+        "metro_stops": 3
       }
     },
     {
@@ -82,7 +84,8 @@
         "nightlife_density": 10.6,
         "grocery_density": 3.3,
         "green_density": 45.8,
-        "transit_density": 38.9
+        "transit_density": 19.5,
+        "metro_stops": 2
       }
     },
     {
@@ -108,14 +111,15 @@
         "nightlife_density": 14.8,
         "grocery_density": 7.7,
         "green_density": 10.8,
-        "transit_density": 34.3
+        "transit_density": 13.4,
+        "metro_stops": 1
       }
     },
     {
       "name": "Arlington",
       "lat": 38.8816,
       "lon": -77.091,
-      "radius_m": 1400,
+      "radius_m": 1800,
       "summary": "Clean, structured, and consistently popular with post-grad professionals who want convenience and a slightly calmer feel.",
       "rent_1br": 2620,
       "rent_2br": 4191,
@@ -134,7 +138,8 @@
         "nightlife_density": 2.6,
         "grocery_density": 2.8,
         "green_density": 16.6,
-        "transit_density": 25.2
+        "transit_density": 14.2,
+        "metro_stops": 3
       }
     },
     {
@@ -160,7 +165,8 @@
         "nightlife_density": 0.4,
         "grocery_density": 2.7,
         "green_density": 6.4,
-        "transit_density": 35.4
+        "transit_density": 16.1,
+        "metro_stops": 1
       }
     },
     {
@@ -186,7 +192,8 @@
         "nightlife_density": 22.1,
         "grocery_density": 6.0,
         "green_density": 24.5,
-        "transit_density": 53.3
+        "transit_density": 26.7,
+        "metro_stops": 1
       }
     }
   ]

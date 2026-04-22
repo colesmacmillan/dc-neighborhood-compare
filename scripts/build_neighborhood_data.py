@@ -65,7 +65,7 @@ NEIGHBORHOODS = [
         "name": "Arlington",
         "lat": 38.8816,
         "lon": -77.0910,
-        "radius_m": 1400,
+        "radius_m": 1800,
         "summary": "Clean, structured, and consistently popular with post-grad professionals who want convenience and a slightly calmer feel.",
         "rent_1br": 2525,
         "rent_2br": 4040,
@@ -119,11 +119,15 @@ METRIC_TAGS = {
     "grocery_density": {"shop": ["supermarket", "convenience"]},
     "green_density": {"leisure": ["park", "garden"]},
     "transit_density": {
-        "public_transport": True,
-        "railway": ["station", "subway_entrance", "halt", "tram_stop"],
+        "public_transport": ["platform", "station", "stop_position"],
+        "railway": ["station", "halt", "tram_stop"],
         "station": ["subway"],
         "amenity": ["bus_station"],
     },
+    "metro_stops": {
+        "station": ["subway"],
+        "railway": ["station"],
+    }
 }
 
 
@@ -258,6 +262,30 @@ def fetch_feature_count(lat: float, lon: float, radius_m: int, tags: dict[str, A
     return int(features.index.nunique())
 
 
+def fetch_unique_named_feature_count(
+    lat: float,
+    lon: float,
+    radius_m: int,
+    tags: dict[str, Any],
+) -> int:
+    features = ox.features_from_point((lat, lon), tags=tags, dist=radius_m)
+    if features.empty:
+        return 0
+
+    if "name" in features.columns:
+        names = (
+            features["name"]
+            .dropna()
+            .astype(str)
+            .str.strip()
+        )
+        names = names[names != ""]
+        if not names.empty:
+            return int(names.nunique())
+
+    return int(features.index.nunique())
+
+
 def density_from_count(count: int, radius_m: int) -> float:
     area_sq_km = math.pi * (radius_m**2) / 1_000_000
     return round(count / area_sq_km, 1)
@@ -270,13 +298,21 @@ def build_record(
 ) -> dict[str, Any]:
     metrics = {}
     for metric_name, tags in METRIC_TAGS.items():
-        count = fetch_feature_count(
-            neighborhood["lat"],
-            neighborhood["lon"],
-            neighborhood["radius_m"],
-            tags,
-        )
-        metrics[metric_name] = density_from_count(count, neighborhood["radius_m"])
+        if metric_name == "metro_stops":
+            metrics[metric_name] = fetch_unique_named_feature_count(
+                neighborhood["lat"],
+                neighborhood["lon"],
+                neighborhood["radius_m"],
+                tags,
+            )
+        else:
+            count = fetch_feature_count(
+                neighborhood["lat"],
+                neighborhood["lon"],
+                neighborhood["radius_m"],
+                tags,
+            )
+            metrics[metric_name] = density_from_count(count, neighborhood["radius_m"])
 
     rent_values = compute_rent_values(neighborhood, existing_record, zillow_proxies)
 
